@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="a5af56c8-f17f-4449-8d25-66dd23c94cb7" basePath="/api" responseTimeout="35000">
+		<http:request-connection host="mysqlapplication1sapi.us-e2.cloudhub.io" />
+	</http:request-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="b590c15a-d4dc-4690-a8cf-ddd2aed31b5a" >
+		<salesforce:basic-connection username="anithad@innovcentric.com" password="Job@12345&#10;" securityToken="etmPpSibnWOW7crx4b8gmq8F" url="https://login.salesforce.com/services/Soap/u/54.0" />
+	</salesforce:sfdc-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="751e08ff-4244-40e0-9b78-cffb1dbda566" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="84a9e0a8-3d6b-44e9-8239-1eaeddb850d6" environment="${mule-env}" />
+	<global-property doc:name="Global Property" doc:id="e27018ac-aac6-459c-be5a-64f85f7131b6" name="mule-env" value="dev" />
+	<configuration-properties doc:name="Configuration properties" doc:id="796fd747-1107-468f-9dd6-7ed3c30cd8c0" file="${mule-env}-config.yaml" />
+</mule>

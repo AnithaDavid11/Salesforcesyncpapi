@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<flow name="mytrainspapiFlow" doc:id="58b0f5f4-1171-45d8-b586-97db3c8fbb26" >
+		<http:listener doc:name="Listener" doc:id="a5cabf41-3664-45a3-a07b-70ba60676701" config-ref="HTTP_Listener_config" path="/papi"/>
+		<json-logger:logger doc:name="Logger" doc:id="6ef1bb15-6311-4c15-bf57-ec8cf1af1630" config-ref="JSON_Logger_Config" message="Start Logger"/>
+		<ee:transform doc:name="Transform Message" doc:id="9e8684b9-4b04-4184-988d-7d0ff9e911f7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> 
+{
+	LastName: payload01.LAST_NAME,
+	FirstName: payload01.FIRST_NAME,
+	Phone: payload01.PHONE_NUMBER,
+	Email: payload01.EMAIL_ID 
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:upsert objectType="Contact" externalIdFieldName="Email" doc:name="Upsert" doc:id="da47063e-56bb-47e5-b686-7619356ee349" config-ref="Salesforce_Config" />
+		<ee:transform doc:name="Transform Message" doc:id="6ac85584-a0b4-4900-b0dc-b5c99bfa482a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+if(payload.successful == true)
+{
+	"Message" : "Records added successfully to salesforce"
+	
+}
+else
+"Message" : "Records are not added to salesforce"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="1224b917-fe81-4c5d-8dc9-c395c17ba1af" config-ref="JSON_Logger_Config" message="End Logger" tracePoint="END"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="d5a9ff06-fce1-401d-ac46-1494c9c74ecb" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="46897013-e0a3-43f9-b007-dfb1d9bceea0" message="Error in flows"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>
